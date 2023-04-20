@@ -24,7 +24,7 @@ public class Teste1 {
         options.setHeadless(false);
         options.addArguments("--remote-allow-origins=*");
         System.setProperty("webdriver.chrome.driver", "C:\\Users\\michel_freitas\\Documents\\DriveNavegadorSelenium\\chromedriver.exe");
-        driver = SelfHealingDriver.create(new ChromeDriver(options));
+        driver = SelfHealingDriver.create(new ChromeDriver(options), );
         driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
         js = (JavascriptExecutor) this.driver;
     }

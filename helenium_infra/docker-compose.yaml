@@ -34,8 +34,9 @@ services:
       - KEY_SELECTOR_URL=false
       - COLLECT_METRICS=true
       - HLM_LOG_LEVEL=info
+      - CAPTURE=on
     volumes:
-      - ../metrics/screenshots/:/screenshots
+      - ../helenium/metrics/screenshots/:/screenshots
     networks:
       - healenium
 
