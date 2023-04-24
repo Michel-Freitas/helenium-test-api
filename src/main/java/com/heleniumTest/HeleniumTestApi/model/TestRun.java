@@ -52,7 +52,7 @@ public class TestRun {
                 "        js = (JavascriptExecutor) this.driver;\n"+
                 "    }\n\n"+
                 "    @Test\n"+
-                "    public void "+ testName +"test() {\n"+
+                "    public void "+ testName +"() {\n"+
                     seleniumCode +
                 "    }\n\n"+
                 "    @AfterAll\n"+

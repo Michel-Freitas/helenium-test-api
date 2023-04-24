@@ -1,13 +1,19 @@
 package com.heleniumTest.HeleniumTestApi.service.implementation;
 
+import com.google.gson.Gson;
 import com.heleniumTest.HeleniumTestApi.dto.request.TestRunRequest;
+import com.heleniumTest.HeleniumTestApi.model.Report;
+import com.heleniumTest.HeleniumTestApi.model.ReportElement;
+import com.heleniumTest.HeleniumTestApi.model.ReportElementRecord;
 import com.heleniumTest.HeleniumTestApi.model.TestRun;
+import com.heleniumTest.HeleniumTestApi.repository.IReportRepository;
 import com.heleniumTest.HeleniumTestApi.service.ITestService;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -16,11 +22,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.*;
+import java.util.function.Predicate;
 
 @Service
 public class TestService implements ITestService {
 
+    @Autowired
+    private IReportRepository reportRepository;
     private final String cloneProjectDirectory;
     private final String testPath;
     private final String mavenDirectory;
@@ -34,7 +43,7 @@ public class TestService implements ITestService {
     }
 
     @Override
-    public String testRun(TestRunRequest test) {
+    public Report testRun(TestRunRequest test) {
         TestRun testRun = new TestRun(test.getTestName(), test.getSeleniumCode());
         testRun.validateTest();
         testRun.assembleTestScript();
@@ -63,7 +72,8 @@ public class TestService implements ITestService {
         } catch (MavenInvocationException e) {
             throw new RuntimeException(e);
         }
-        return "Deu certo!";
+
+        return findReport(testRun.getTestName());
     }
 
     private void copyDir(String sourceDir, String targetDir) {
@@ -87,5 +97,27 @@ public class TestService implements ITestService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    public Report findReport(String testName) {
+        String testClassName = "com.templateProject.template_project." + testName;
+        Predicate<ReportElementRecord> filterReportElement = r -> r.getClassName().equalsIgnoreCase(testClassName);
+
+        Gson gson = new Gson();
+        List<Report> reportsList = reportRepository.findAll();
+        Report report = new Report();
+
+        reportsList.forEach(item -> {
+            ReportElement reportElement = gson.fromJson(item.getElements(), ReportElement.class);
+            List<ReportElementRecord> reportElementRecordList = reportElement.getRecords().stream()
+                    .filter(filterReportElement).toList();
+            if (reportElementRecordList.size() > 0) {
+                report.setCreateDate(item.getCreateDate());
+                report.setElements(item.getElements());
+                report.setUid(item.getUid());
+                report.setMappedElements(reportElement);
+            }
+        });
+
+        return report;
     }
 }
