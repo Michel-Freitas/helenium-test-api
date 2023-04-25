@@ -41,40 +41,43 @@ services:
 
   selector-imitator:
     image: healenium/hlm-selector-imitator:1.1
-    container_name: selector-imitator
+    container_name: selector-imitator-html
     restart: on-failure
     ports:
       - "8000:8000"
     networks:
       - healenium
 
-#  selenoid:
-#    image: healenium/hlm-selenoid:0.1.0
-#    container_name: selenoid
-#    restart: on-failure
-#    ports:
-#      - "4444:4444"
-#    environment:
-##      - PROXY_CONTAINER_NAME=hlm-proxy
-#      - OVERRIDE_VIDEO_OUTPUT_DIR=./videos
-#      - VIDEO-RECORD-IMAGE= video-recorder-image=selenoid/video-recorder:7.1
-#    volumes:
-#      - ./selenoid:/etc/selenoid
-#      - ./dockerSock:/var/run/docker.sock
-#      - ./videos:/opt/selenoid/video/
-#    command: [ "-container-network", "healenium" ]
-#    networks:
-#      - healenium
-#
-#  selenoid-ui:
-#      image: aerokube/selenoid-ui:1.10.9
-#      container_name: selenoid-ui
-#      restart: on-failure
-#      ports:
-#        - "8080:8080"
-#      command: [ "--selenoid-uri", "http://hlm-selenoid:4444" ]
-#      networks:
-#        - healenium
+  selenoid:
+    image: healenium/hlm-selenoid:0.1.0
+    container_name: selenoid-hml
+    restart: on-failure
+    ports:
+      - "4444:4444"
+    environment:
+      - LIMIT=10
+      - OVERRIDE_VIDEO_OUTPUT_DIR=DIRETORIO FORA DO CONTAINER CAMINHO ABSOLUTO
+    volumes:
+      - .:/etc/selenoid
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./videos:/opt/selenoid/video/
+    command: [
+      "-container-network", "healenium",
+      "-video-output-dir", "/opt/selenoid/video"]
+    networks:
+      - healenium
+
+  selenoid-ui:
+      image: aerokube/selenoid-ui:1.10.9
+      container_name: selenoid-ui-hml
+      restart: on-failure
+      ports:
+        - "8080:8080"
+      command: [ "--selenoid-uri", "http://selenoid:4444" ]
+      links:
+        - selenoid
+      networks:
+        - healenium
 
 networks:
   healenium:
